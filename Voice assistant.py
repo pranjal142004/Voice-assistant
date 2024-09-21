@@ -104,14 +104,7 @@ def authenticate():
     else:
         return False
 
-def monitor_stop_command():
-    global stop_flag
-    while True:
-        query = takeCommand()
-        if 'stop' in query:
-            stop_flag = True
-            speak("Stopping all actions.")
-            break
+
 
 if __name__ == "__main__":    
     if not authenticate():
@@ -165,19 +158,12 @@ if __name__ == "__main__":
             if search_query:
                 speak(f"Searching for {search_query} on YouTube...")
                 wk.playonyt(search_query)
-                
+                speak("Enjoy the video, Boss!")
                 stop_thread = threading.Thread(target=monitor_stop_command)
                 stop_thread.start()
-                
                 for i in range(200):
-                    time.sleep(1)
-                    if stop_flag:
-                        break
-                
-                if not stop_flag:
-                    speak("The song has ended. What else can I do for you, Boss?")
-                else:
-                    break
+                    speak("The video has ended. What else can I do for you, Boss?")
+
 
         elif 'just open gmail' in query:
             webbrowser.open('https://mail.google.com')
@@ -212,6 +198,5 @@ if __name__ == "__main__":
         elif 'close chrome' in query:
             os.system("taskkill /f /im chrome.exe")
             speak("Google Chrome has been closed.")
-#...............................................................................................................
 
         
