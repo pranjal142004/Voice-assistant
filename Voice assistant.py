@@ -10,11 +10,13 @@ import webbrowser
 import wikipedia
 import subprocess
 import ctypes
+import cv2
+import sys
 
-# Initialize the speech engine
+
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
-engine.setProperty('voice', voices[1].id)  # Female voice
+engine.setProperty('voice', voices[1].id)  
 engine.setProperty('rate', 160)
 
 def speak(audio):
@@ -30,7 +32,7 @@ def wishMe():
         speak("Good Afternoon Sir!")
     else:
         speak("Good Evening Sir!")
-    speak("How are you Sir? What can I do? Would you like to perform any calculations?")
+    speak("How are you Sir? What can I do?")
 
 def takeCommand():
     r = sr.Recognizer()
@@ -54,10 +56,38 @@ def takeCommand():
         return "None"
     return query.lower()
 
-# Function to open specific applications
+def listen():
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Listening...")
+        audio = recognizer.listen(source)
+        
+        try:
+            text = recognizer.recognize_google(audio)
+            print(f"You said: {text}")
+            return text
+        except sr.UnknownValueError:
+            speak("Sorry, I didn't catch that. Please try again.")
+            return ""
+        except sr.RequestError:
+            speak("There seems to be an issue with the service. Please try again later.")
+            return ""
+
 def open_notepad():
+    speak("What would you like me to write in Notepad?")
+    text = listen()  
+    
     speak("Opening Notepad.")
-    subprocess.Popen('notepad.exe')
+    process = subprocess.Popen('notepad.exe')
+    
+    time.sleep(1)  
+    
+    if text:
+        speak(f"Writing the text in Notepad: {text}")
+        os.system(f'echo {text} | clip')  
+        os.system('powershell "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait(\'^v\')"')  # Pastes the text in Notepad
+    else:
+        speak("No text was provided to write in Notepad.")
 
 def close_notepad():
     os.system("taskkill /f /im notepad.exe")
@@ -66,7 +96,6 @@ def close_notepad():
 def open_commandprompt():
     speak("Opening Command Prompt.")
     try:
-        # Using shell=True to open it with the system shell
         subprocess.Popen('start cmd', shell=True)
     except Exception as e:
         speak("Failed to open Command Prompt.")
@@ -86,7 +115,7 @@ def close_paint():
     speak("Paint has been closed.")
 
 def open_word():
-    word_path = "C:/Program Files/Microsoft Office/root/Office16/WINWORD.EXE"  # Change path if necessary
+    word_path = "C:/Program Files/Microsoft Office/root/Office16/WINWORD.EXE"  
     if os.path.exists(word_path):
         speak("Opening Microsoft Word.")
         subprocess.Popen([word_path])
@@ -98,7 +127,7 @@ def close_word():
     speak("Microsoft Word has been closed.")
 
 def open_excel():
-    excel_path = "C:/Program Files/Microsoft Office/root/Office16/EXCEL.EXE"  # Change path if necessary
+    excel_path = "C:/Program Files/Microsoft Office/root/Office16/EXCEL.EXE"  
     if os.path.exists(excel_path):
         speak("Opening Microsoft Excel.")
         subprocess.Popen([excel_path])
@@ -117,43 +146,34 @@ def close_calculator():
     os.system("taskkill /f /im Calculator.exe")
     speak("Calculator has been closed.")
 
-# Updated screenshot functionality
 def take_screenshot():
     speak("Taking a screenshot...")
     
-    # Specify the directory where screenshots will be saved
     screenshot_directory = "screenshots"
     
-    # Create the directory if it doesn't exist
     if not os.path.exists(screenshot_directory):
         os.makedirs(screenshot_directory)
     
-    # Get current date and time to create a unique filename
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     screenshot_path = os.path.join(screenshot_directory, f"screenshot_{timestamp}.png")
     
-    # Capture and save the screenshot
     screenshot = pyautogui.screenshot()
     screenshot.save(screenshot_path)
     
     speak(f"Screenshot taken and saved as {screenshot_path}.")
     
-    # Automatically open the folder (gallery) where the screenshot is saved
     speak("Opening the gallery for you.")
     subprocess.Popen(f'explorer "{os.path.abspath(screenshot_directory)}"')
 
-# Function to open gallery
 def open_gallery():
     speak("Opening your picture gallery.")
-    pictures_folder = os.path.join(os.environ["USERPROFILE"], "Pictures")  # Default pictures folder path
+    pictures_folder = os.path.join(os.environ["USERPROFILE"], "Pictures")  
     subprocess.Popen(f'explorer "{pictures_folder}"')
 
-# Function to close gallery
 def close_gallery():
     os.system("taskkill /f /im explorer.exe")
     speak("Gallery has been closed.")
 
-# System control functions
 def shutdown_system():
     speak("Shutting down the system.")
     os.system("shutdown /s /t 1")
@@ -166,7 +186,6 @@ def lock_system():
     speak("Locking the system.")
     ctypes.windll.user32.LockWorkStation()
 
-# Calculation function
 def calculate(expression):
     try:
         result = eval(expression)
@@ -330,3 +349,20 @@ if __name__ == "__main__":
             pyautogui.press("volumedown")
             pyautogui.press("volumedown")
             pyautogui.press("volumedown")
+            
+        elif 'open camera' in query:
+            cap = cv2.VideoCapture(0)
+            while True:
+                ret, img = cap.read()
+                cv2.imshow('webcam', img)
+                k = cv2.waitKey(50)
+                if k==27:
+                    break;
+                cap.release()
+                cv2.destroyAllWindows()
+                
+        elif 'go to sleep' in query:
+            speak(' alright then, I am switiching off')
+            sys.exit()
+                
+            
