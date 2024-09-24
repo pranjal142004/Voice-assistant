@@ -3,12 +3,13 @@ import pyttsx3
 import speech_recognition as sr
 import datetime
 import pywhatkit as wk
-import time  
+import time
 import pyautogui
 import pygame
 import webbrowser
 import wikipedia
 import subprocess
+import ctypes
 
 # Initialize the speech engine
 engine = pyttsx3.init('sapi5')
@@ -64,9 +65,15 @@ def close_notepad():
 
 def open_commandprompt():
     speak("Opening Command Prompt.")
-    subprocess.Popen('cmd.exe')
+    try:
+        # Using shell=True to open it with the system shell
+        subprocess.Popen('start cmd', shell=True)
+    except Exception as e:
+        speak("Failed to open Command Prompt.")
+        print(f"Error: {e}")
 
 def close_commandprompt():
+    import os
     os.system("taskkill /f /im cmd.exe")
     speak("Command Prompt has been closed.")
 
@@ -134,23 +141,6 @@ def take_screenshot():
     # Automatically open the folder (gallery) where the screenshot is saved
     speak("Opening the gallery for you.")
     subprocess.Popen(f'explorer "{os.path.abspath(screenshot_directory)}"')
-
-# Function to play music
-def play_music(song_name=None):
-    pygame.mixer.init()
-    music_folder = "C:/Music"  # Update to your music folder
-    if not song_name:
-        # If no song is provided, play a default song
-        song_name = random.choice(os.listdir(music_folder))
-    song_path = os.path.join(music_folder, song_name)
-    if os.path.exists(song_path):
-        speak(f"Playing {song_name}")
-        pygame.mixer.music.load(song_path)
-        pygame.mixer.music.play()
-        while pygame.mixer.music.get_busy():
-            time.sleep(1)
-    else:
-        speak("I couldn't find that song, please check the music folder.")
 
 # Function to open gallery
 def open_gallery():
@@ -293,13 +283,6 @@ if __name__ == "__main__":
             close_calculator()
         elif 'take screenshot' in query:
             take_screenshot()
-        elif 'open music' in query:
-            speak("What song would you like me to play?")
-            song_query = takeCommand()
-            if song_query:
-                play_music(song_query)
-        elif 'play favorite song' in query:
-            play_music()
         elif 'shutdown the system' in query:
             shutdown_system()
         elif 'restart the system' in query:
@@ -313,3 +296,37 @@ if __name__ == "__main__":
         elif 'what is the time' in query:  
             strTime = datetime.datetime.now().strftime("%H:%M:%S")
             speak(f"Sir, the time is {strTime}")
+            
+        elif 'volume up' in query:
+            pyautogui.press("volumeup")
+            pyautogui.press("volumeup")
+            pyautogui.press("volumeup")
+            pyautogui.press("volumeup")
+            pyautogui.press("volumeup")
+            pyautogui.press("volumeup")
+            pyautogui.press("volumeup")
+            pyautogui.press("volumeup")
+            pyautogui.press("volumeup")
+            pyautogui.press("volumeup")
+            pyautogui.press("volumeup")
+            pyautogui.press("volumeup")
+            pyautogui.press("volumeup")
+            pyautogui.press("volumeup")
+            pyautogui.press("volumeup")
+            
+        elif 'volume down' in query:
+            pyautogui.press("volumedown")
+            pyautogui.press("volumedown")
+            pyautogui.press("volumedown")
+            pyautogui.press("volumedown")
+            pyautogui.press("volumedown")
+            pyautogui.press("volumedown")
+            pyautogui.press("volumedown")
+            pyautogui.press("volumedown")
+            pyautogui.press("volumedown")
+            pyautogui.press("volumedown")
+            pyautogui.press("volumedown")
+            pyautogui.press("volumedown")
+            pyautogui.press("volumedown")
+            pyautogui.press("volumedown")
+            pyautogui.press("volumedown")
