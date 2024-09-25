@@ -12,7 +12,12 @@ import subprocess
 import ctypes
 import cv2
 import sys
+import random
 
+responses = {}
+conversation_context = []
+greetings = ["Hello! How can I help you today?", "Hi there, what can I do for you?", "Hey! How’s it going?"]
+farewells = ["Goodbye! Have a great day!", "See you later!", "Take care, goodbye!"]
 
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
@@ -23,6 +28,40 @@ def speak(audio):
     print(f"Speaking: {audio}")
     engine.say(audio)
     engine.runAndWait()
+    
+def jarvis_conversation():
+    global conversation_context
+
+    while True:
+        command = listen_command()
+
+        if command:
+            # Greeting commands
+            if "hello" in command or "hi" in command:
+                greeting = random.choice(greetings)
+                jarvis_say(greeting)
+                conversation_context.append(greeting)
+
+            # Asking how you're doing
+            elif "how are you" in command:
+                jarvis_say("I am just a program, but I'm functioning at my best. How about you?")
+                conversation_context.append("I am functioning at my best.")
+
+            # General questions
+            elif "who are you" in command or "what can you do" in command:
+                jarvis_say("I am your personal assistant, Jarvis. I can help you with many things like setting reminders, answering questions, or even controlling your computer.")
+                conversation_context.append("I am your personal assistant.")
+
+            elif "goodbye" in command or "bye" in command:
+                farewell = random.choice(farewells)
+                jarvis_say(farewell)
+                conversation_context.append(farewell)
+                break
+
+            # If Jarvis doesn't understand the command
+            else:
+                jarvis_say("I'm sorry, I didn't quite catch that. Could you say it again?")
+                conversation_context.append("Jarvis didn't understand.")
 
 def wishMe():
     hour = datetime.datetime.now().hour
@@ -33,6 +72,10 @@ def wishMe():
     else:
         speak("Good Evening Sir!")
     speak("How are you Sir? What can I do?")
+    
+def jarvis_say(text):
+    engine.say(text)
+    engine.runAndWait()
 
 def takeCommand():
     r = sr.Recognizer()
@@ -56,7 +99,7 @@ def takeCommand():
         return "None"
     return query.lower()
 
-def listen():
+def listen_command():
     recognizer = sr.Recognizer()
     with sr.Microphone() as source:
         print("Listening...")
@@ -75,7 +118,7 @@ def listen():
 
 def open_notepad():
     speak("What would you like me to write in Notepad?")
-    text = listen()  
+    text = listen_command()  
     
     speak("Opening Notepad.")
     process = subprocess.Popen('notepad.exe')
@@ -143,8 +186,11 @@ def open_calculator():
     subprocess.Popen('calc.exe')
 
 def close_calculator():
-    os.system("taskkill /f /im Calculator.exe")
-    speak("Calculator has been closed.")
+    try:
+        subprocess.run("taskkill /f /im CalculatorApp.exe", shell=True, check=True)
+        speak("Calculator has been closed.")
+    except subprocess.CalledProcessError:
+        speak("Failed to close Calculator. It might not be running.")
 
 def take_screenshot():
     speak("Taking a screenshot...")
@@ -193,6 +239,17 @@ def calculate(expression):
     except Exception as e:
         speak("Sorry, I couldn't perform that calculation.")
         print(e)
+        
+def main():
+    while True:
+        print("Tell me a rule or speak a command (or say 'exit' to quit):")
+        command = listen_command()
+
+        if command:
+            if "exit" in command:
+                print("Goodbye!")
+                jarvis_say("Goodbye!")
+                break
 
 if __name__ == "__main__":    
     wishMe()
@@ -229,12 +286,13 @@ if __name__ == "__main__":
                 subprocess.Popen([chrome_path, url])
             else:
                 speak("I couldn't find Google Chrome. Please check the installation.")
-
+                
         elif 'open google' in query:
             speak("What should I search?")
             search_query = takeCommand()
             if search_query:
                 webbrowser.open(f'https://www.google.com/search?q={search_query}')
+
                 
         elif 'just open youtube' in query:
             chrome_path = "C:/Program Files/Google/Chrome/Application/chrome.exe"
@@ -276,6 +334,8 @@ if __name__ == "__main__":
             os.system("taskkill /f /im chrome.exe")
             speak("Google Chrome has been closed.")
             
+        elif 'Hello jarvis' in query:
+            jarvis_conversation()    
         elif 'open notepad' in query:
             open_notepad()
         elif 'close notepad' in query:
@@ -350,19 +410,38 @@ if __name__ == "__main__":
             pyautogui.press("volumedown")
             pyautogui.press("volumedown")
             
-        elif 'open camera' in query:
-            cap = cv2.VideoCapture(0)
-            while True:
-                ret, img = cap.read()
-                cv2.imshow('webcam', img)
-                k = cv2.waitKey(50)
-                if k==27:
-                    break;
-                cap.release()
-                cv2.destroyAllWindows()
-                
-        elif 'go to sleep' in query:
-            speak(' alright then, I am switiching off')
-            sys.exit()
-                
+        elif 'open new window' in query:
+            pyautogui.hotkey('ctrl', 'n')
             
+        elif 'open incognito window' in query:
+            pyautogui.hotkey('ctrl', 'shift', 'n')
+            
+        elif 'minimise the window' in query:
+            pyautogui.hotkey('win', 'down')  # This will minimize if already maximized
+            time.sleep(1)
+            
+        
+        elif 'maximize the window' in query:
+            pyautogui.hotkey('win', 'up')  # Maximize the window
+            time.sleep(1)
+            
+        elif 'open history' in query:
+            pyautogui.hotkey('ctrl', 'h')
+            
+        elif 'open download' in query:
+            pyautogui.hotkey('ctrl', 'j')
+            
+        elif 'previous tab' in query:
+            pyautogui.hotkey('ctrl', 'shift', 'tab')
+            
+        elif 'next tab' in query:
+            pyautogui.hotkey('ctrl', 'tab')
+            
+        elif 'close tab' in query:
+            pyautogui.hotkey('ctrl', 'w')
+            
+        elif 'close Window' in query:
+            pyautogui.hotkey('ctrl', 'shift', 'w')
+            
+        elif 'clear browsing history' in query:
+            pyautogui.hotkey('ctrl', 'shift', 'delete')
