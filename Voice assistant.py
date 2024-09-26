@@ -13,6 +13,7 @@ import ctypes
 import cv2
 import sys
 import random
+import calendar
 
 responses = {}
 conversation_context = []
@@ -22,7 +23,7 @@ farewells = ["Goodbye! Have a great day!", "See you later!", "Take care, goodbye
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
 engine.setProperty('voice', voices[1].id)  
-engine.setProperty('rate', 160)
+engine.setProperty('rate', 150)
 
 def speak(audio):
     print(f"Speaking: {audio}")
@@ -64,19 +65,74 @@ def jarvis_conversation():
                 conversation_context.append("Jarvis didn't understand.")
 
 def wishMe():
-    hour = datetime.datetime.now().hour
+    now = datetime.datetime.now()
+    hour = now.hour
+    minute = now.minute
+    current_time = now.strftime("%I:%M %p")  # Format the time as HH:MM AM/PM
+
     if 0 <= hour < 12:
-        speak("Good Morning Sir!")
+        speak(f"Good Morning Sir! It's {current_time}.")
     elif 12 <= hour < 18:
-        speak("Good Afternoon Sir!")
+        speak(f"Good Afternoon Sir! It's {current_time}.")
     else:
-        speak("Good Evening Sir!")
-    speak("How are you Sir? What can I do?")
+        speak(f"Good Evening Sir! It's {current_time}.")
     
+    speak("How are you Sir? What can I do?")
+
 def jarvis_say(text):
     engine.say(text)
     engine.runAndWait()
+    
+stopwatch_running = False
+start_time = 0
 
+def open_stopwatch():
+    global stopwatch_running, start_time
+    stopwatch_running = False
+    start_time = 0
+    speak("Stopwatch is ready. Say 'start stopwatch' to begin.")
+
+def start_stopwatch():
+    global stopwatch_running, start_time
+    if not stopwatch_running:
+        start_time = time.time()
+        stopwatch_running = True
+        speak("Stopwatch started.")
+    else:
+        speak("Stopwatch is already running.")
+
+def stop_stopwatch():
+    global stopwatch_running, start_time
+    if stopwatch_running:
+        elapsed_time = time.time() - start_time
+        stopwatch_running = False
+        speak(f"Stopwatch stopped. Elapsed time: {elapsed_time:.2f} seconds.")
+    else:
+        speak("Stopwatch is not running.")
+
+def close_stopwatch():
+    global stopwatch_running, start_time
+    if stopwatch_running:
+        stop_stopwatch()
+    speak("Stopwatch closed.")
+    start_time = 0
+    stopwatch_running = False
+    
+    
+def solve_math_problem(command):
+    try:
+        # Replace words with symbols
+        command = command.replace("plus", "+")
+        command = command.replace("minus", "-")
+        command = command.replace("multiplied by", "*")
+        command = command.replace("divided by", "/")
+
+        # Evaluate the expression
+        result = eval(command)
+        return f"The result is {result}"
+    except Exception as e:
+        return f"Sorry, I couldn't solve the problem. Error: {str(e)}"
+    
 def takeCommand():
     r = sr.Recognizer()
     with sr.Microphone() as source:
@@ -118,16 +174,16 @@ def listen_command():
 
 def open_notepad():
     speak("What would you like me to write in Notepad?")
-    text = listen_command()  
+    text = listen_command()
     
     speak("Opening Notepad.")
     process = subprocess.Popen('notepad.exe')
     
-    time.sleep(1)  
+    time.sleep(1)
     
     if text:
         speak(f"Writing the text in Notepad: {text}")
-        os.system(f'echo {text} | clip')  
+        os.system(f'echo {text} | clip')  # Copies the text to clipboard
         os.system('powershell "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait(\'^v\')"')  # Pastes the text in Notepad
     else:
         speak("No text was provided to write in Notepad.")
@@ -240,6 +296,16 @@ def calculate(expression):
         speak("Sorry, I couldn't perform that calculation.")
         print(e)
         
+def calendar():
+    if "open calendar" in query:
+        os.system('start outlookcal:')
+        speak("Calendar opened.")
+    elif "close calendar" in query:
+        os.system('taskkill /IM HxCalendarAppImm.exe /F')
+        speak("Calendar closed.")
+    else:
+        speak("Sorry, I didn't understand that command.")
+        
 def main():
     while True:
         print("Tell me a rule or speak a command (or say 'exit' to quit):")
@@ -259,11 +325,14 @@ if __name__ == "__main__":
             break  
         elif 'jarvis' in query:
             speak("Yes Boss")
+            
+        elif 'hu r u' in query:
+            speak("I am voice assisstent and My name is Jarvis")
         
         elif 'what is your name' in query:
             speak("My name is Jarvis")
         
-        elif 'what is ' in query:
+        elif 'search' in query:
             speak('Searching Wikipedia...')
             query = query.replace('wikipedia', '')
             try:
@@ -372,9 +441,10 @@ if __name__ == "__main__":
             open_gallery()
         elif 'close gallery' in query:
             close_gallery()
-        elif 'what is the time' in query:  
-            strTime = datetime.datetime.now().strftime("%H:%M:%S")
-            speak(f"Sir, the time is {strTime}")
+        
+            
+        elif 'solve the equation' in query:
+            solve_math_problem()
             
         elif 'volume up' in query:
             pyautogui.press("volumeup")
@@ -445,3 +515,21 @@ if __name__ == "__main__":
             
         elif 'clear browsing history' in query:
             pyautogui.hotkey('ctrl', 'shift', 'delete')
+            
+        elif "open calendar" in query:
+            calendar()
+
+        elif "close calendar" in query:
+            calendar()
+            
+        elif 'open stopwatch' in query:
+            open_stopwatch()
+            
+        elif 'start stopwatch' in query:
+            start_stopwatch()
+            
+        elif 'stop stopwatch' in query:
+            stop_stopwatch()
+            
+        elif 'close stopwatch' in query:
+            close_stopwatch()
