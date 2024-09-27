@@ -1,3 +1,5 @@
+Note :- The code will not run without internet.
+
 First Step Install all  python library in this code.
 
 Second step open the terminal or CMD and write this code.
@@ -33,3 +35,5 @@ Second step open the terminal or CMD and write this code.
 #. pip install Random
 
 #. pip install Calendar
+
+NOTE :-  It is good if the library gets downloaded, but if the library is not downloaded then write it exactly as it is written in the code.
