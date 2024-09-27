@@ -395,6 +395,17 @@ if __name__ == "__main__":
             speak("Opening Netflix...")
             webbrowser.open('https://www.netflix.com')
             
+        elif 'just open chat gpt' in query:
+            speak("Open chat gpt...")
+            webbrowser.open('http://www.chatgpt.com')
+            
+        elif 'open chat gpt' in query:
+            speak("What should I search?")
+            search_query = takeCommand()
+            if search_query:
+                webbrowser.open(f'https://www.chatgpt.com/search?q={search_query}')
+                
+            
         elif 'close browser' in query:
             os.system("taskkill /f /im msedge.exe")
             speak("Microsoft Edge has been closed.")
@@ -533,3 +544,17 @@ if __name__ == "__main__":
             
         elif 'close stopwatch' in query:
             close_stopwatch()
+            
+            
+        
+            
+            
+            
+            
+            
+            
+        
+            
+        
+                
+            
