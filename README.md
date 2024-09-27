@@ -2,7 +2,7 @@ Read all the elif statements carefully and understand them to make it easy for y
 
 
 
-Note :- The code will not run without internet.
+%. Note :- The code will not run without internet.
 
 First Step Install all  python library in this code.
 
