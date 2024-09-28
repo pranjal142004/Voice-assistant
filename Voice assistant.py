@@ -326,7 +326,7 @@ if __name__ == "__main__":
         elif 'jarvis' in query:
             speak("Yes Boss")
             
-        elif 'hu r u' in query:
+        elif 'who are you' in query:
             speak("I am voice assisstent and My name is Jarvis")
         
         elif 'what is your name' in query:
